@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTTP/1.1 vs HTTP/2 demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    #images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      margin-top: 1rem;
+    }
+    #images img {
+      width: 20px;
+      height: 20px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <h1>HTTP/1.1 vs HTTP/2 multiplexing demo</h1>
+
+  <p>
+    This page loads a lot of tiny images from the same server so we can see how
+    browsers behave with HTTP/1.1 and HTTP/2.
+  </p>
+
+  <p id="status">Starting requests...</p>
+
+  <div id="images"></div>
+
+  <script>
+    const COUNT = 200;            // how many images to request
+    const container = document.getElementById('images');
+    const status = document.getElementById('status');
+
+    let loaded = 0;
+    const start = performance.now();
+
+    function onImgFinished() {
+      loaded += 1;
+      if (loaded === COUNT) {
+        const ms = performance.now() - start;
+        const sec = (ms / 1000).toFixed(2);
+        status.textContent =
+          `Loaded ${COUNT} images in ${sec} s (see DevTools Network for details).`;
+        console.log(`All images loaded in ${sec} s`);
+      }
+    }
+
+    status.textContent = `Requesting ${COUNT} images...`;
+
+    for (let i = 0; i < COUNT; i++) {
+      const img = new Image();
+      // cache buster so the browser does not reuse one response
+      img.src = `/image.png?i=${i}&ts=${Date.now()}`;
+      img.onload = onImgFinished;
+      img.onerror = onImgFinished;
+      container.appendChild(img);
+    }
+  </script>
+</body>
+</html>
